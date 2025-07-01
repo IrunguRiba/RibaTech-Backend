@@ -18,11 +18,11 @@ app.use(express.json());
 app.use(
 
     cors({
-        origin: "*",
-        methods: ["GET", "POST", "PUT", "DELETE"],
+        origin: ['http://localhost:4200', 'https://riba-tech-project.vercel.app'], 
         credentials: true,
-        allowedHeaders: ["Content-Type", "Authorization"],
-    })
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+      })      
 );
 
 // Routes
