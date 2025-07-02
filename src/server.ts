@@ -30,6 +30,7 @@ app.use(
 app.use('/api/v1/consultations', consultantRoutes)
 // Test route
 
+
 app.get("/", (req, res) => {
     res.send("Hello, this is the Riba tech server, it is working🔥🔥👍");
 });
