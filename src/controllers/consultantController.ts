@@ -19,18 +19,6 @@ export const submitConsultation = asyncHandler(async (req: Request, res: Respons
       terms_accepted,
     } = req.body;
 
-    if (
-      !organization_name ||
-      !full_name ||
-      !phone ||
-      !email ||
-      !project_details ||
-      typeof terms_accepted === 'undefined'
-    ) {
-      console.warn("⚠️ Missing required fields");
-      return res.status(400).json({ message: "Missing required fields" });
-    }
-
     const result = await pool.query(
       `INSERT INTO consultations (
         organization_name, full_name, phone, email, project_details, terms_accepted
@@ -39,9 +27,9 @@ export const submitConsultation = asyncHandler(async (req: Request, res: Respons
     );
 
     const inserted = result.rows[0];
-    console.log("✅ Inserted consultation:", inserted);
+    console.log("✅ Inserted into DB:", inserted);
 
-    // Email reviewer immediately
+    // Notify reviewer
     await sendMail(
       REVIEWER_EMAIL,
       'New Consultation Booking',
@@ -60,18 +48,21 @@ export const submitConsultation = asyncHandler(async (req: Request, res: Respons
           `<p>Hello ${full_name},</p>
            <p>Thank you for reaching out. We have received your consultation request and will contact you shortly.</p>`
         );
-      } catch (emailErr) {
-        console.error('❌ Failed to send delayed applicant email:', emailErr);
+      } catch (emailError) {
+        console.error("❌ Error sending delayed email to applicant:", emailError);
       }
     }, 10 * 60 * 1000); // 10 minutes
 
-    res.status(201).json({
-      message: 'Consultation submitted successfully. Await further contact.',
+    return res.status(201).json({
+      message: 'Consultation submitted successfully.',
       consultation: inserted,
     });
 
-  } catch (err: any) {
-    console.error("🔥 Server error in consultation submission:", err.message);
-    res.status(500).json({ message: "Internal Server Error", error: err.message });
+  } catch (error) {
+    console.error("🔥 Server error in consultation submission:", error); // 🛠 THIS WILL SHOW THE ERROR
+    return res.status(500).json({
+      message: "Internal Server Error",
+      error: (error as Error).message || error,
+    });
   }
 });
